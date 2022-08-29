@@ -1,4 +1,4 @@
-# Bowl Cut
+# bowlcut.vim
 
 ## Motivation
 
@@ -68,6 +68,18 @@ augroup golang_jump
   autocmd FileType go nnoremap <buffer> <C-]> :BowlcutJumpALE<CR>
 augroup END
 ```
+
+## Installation
+
+Install using your favorite package manager, or use Vim's built-in package support:
+
+```
+mkdir -p ~/.vim/pack/joe-mcgovern/start
+cd ~/.vim/pack/joe-mcgovern/start
+git clone https://github.com/joe-mcgovern/vim-bowlcut.git
+```
+
+## Configuration 
 
 ### Disabling FZF dependency
 

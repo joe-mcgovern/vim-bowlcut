@@ -29,7 +29,7 @@ useful, I would consider adding features so that other languages could be compat
 before using this.
 
 ⚠️ This plugin has a default dependency on fzf, but it can easily be disabled (see
-[Disabling FZF dependency](#disabling-fzf-dependency).
+[Disabling FZF dependency](#disabling-fzf-dependency)).
 
 ## Usage
 

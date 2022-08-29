@@ -88,7 +88,7 @@ variables:
 
 ```
 let g:bowlcut_prefixes = ['prefix1', 'prefix2']
-let g:bowlcut_suffixes = ['prefix1', 'prefix2']
+let g:bowlcut_suffixes = ['suffix1', 'suffix2']
 ```
 
 ### Providing your own matching function

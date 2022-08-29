@@ -114,4 +114,3 @@ provided to the grep tool.
 ## TODOS
 
 * Write help doc
-* Get rid of hacky way to jump to function name

@@ -168,10 +168,8 @@ def JumpToDefinition(wordToSearch: string)
   # was resulting in some weird behavior.
   execute "buffer " .. bufnum
   setpos(".", [bufnum, firstMatch.line_number, firstMatch.column_number, 0])
-  # I know this is hacky, but it will jump from the start of the line to the
-  # beginning of the function name
-  # This will need to be updated if we want to use more languages
-  execute "normal! WWW"
+  # Move the cursor to the word we are searching for
+  search(wordToSearch)
 enddef
 
 def StartsWith(str: string, prefix: string): bool

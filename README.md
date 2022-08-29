@@ -17,8 +17,8 @@ to solve. Given a list of prefixes and suffixes produced by auto-generated code,
 this plugin can determine if the word under cursor should be stripped of those
 prefixes & suffixes, and then jump to the *stripped* word. 
 
-The focus of this project is on golang, with the auto-generated files having
-`*.pb.go` extensions. Files with that extension will be removed from the results.
+This project was built with golang in mind. Thus, the default query searches
+for a golang function.
 
 I built this project to solve a problem I was facing, but if others find the concept
 useful, I would consider adding features so that other languages could be compatible.
@@ -39,7 +39,7 @@ They are:
 `BowlcutJump`
 `BowlcutJumpALE`
 
-The first removes the temporal prefixes and suffixes, and then greps for the
+The first removes the globally defined prefixes and suffixes, and then greps for the
 word under cursor. If it finds a single match, it will jump to that definition 
 and return true. If it finds no matches, it will do nothing and return false. If
 it finds multiple matches, it will call the function defined in the global variable
@@ -48,7 +48,7 @@ in a fzf preview window, and then return true.
 
 The `BowlcutJumpALE` does the same thing as  `BowlcutJump`
 except that it if not results are found, it will fallback on the `ALEGoToDefinition`
-function to jump to the ENTIRE definition under cursor (including temporal prefixes
+function to jump to the ENTIRE definition under cursor (including defined prefixes
 and suffixes).
 
 Only one prefix will be removed. Once a match is found, no more prefixes are
@@ -77,6 +77,7 @@ Install using your favorite package manager, or use Vim's built-in package suppo
 mkdir -p ~/.vim/pack/joe-mcgovern/start
 cd ~/.vim/pack/joe-mcgovern/start
 git clone https://github.com/joe-mcgovern/vim-bowlcut.git
+vim -u NONE -c "helptags bowlcut/doc" -c q
 ```
 
 ## Configuration 
@@ -107,22 +108,16 @@ let g:bowlcut_suffixes = ['suffix1', 'suffix2']
 
 If you want to use a different grep mechanism, you provide your own matching
 function by setting the `g:bowlcut_match_func` variable. This function takes in
-a string, which is the *stripped* word under cursor (meaning temporal prefixes
+a string, which is the *stripped* word under cursor (meaning the prefixes
 and suffixes have been removed). It MUST return a list of dictionaries that
 contain the following keys & values: `filename`, `line_number`, and `column_number`.
 `line_number` and `column_number` MUST be numbers (which can be accomplished
 using the `str2nr(in_string)` function).
 
-TODO provide link to example.
-
 ### Providing your own query function
 
 You also may override the default query function by setting the `g:bowlcut_query_func`
 variable. This function takes in a string and outputs a string. The input string
-is the *stripped* word under cursor (meaning temporal prefixes and suffixes have
+is the *stripped* word under cursor (meaning prefixes and suffixes have
 been removed). The string it returns should be a regex pattern that will be
 provided to the grep tool.
-
-## TODOS
-
-* Write help doc

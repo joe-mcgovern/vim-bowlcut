@@ -1,0 +1,134 @@
+*bowlcut.txt*		Search for / jump to a trimmed version of text under cursor
+
+Author: Joe McGovern
+
+INTRODUCTION 						*bowlcut*
+
+This project was created because of a problem I had been running into at work.
+A service would define a function like `FetchResource`. We would then generate
+some code for clients to interact with this service, but the definitions the
+clients use would be something like `ExecuteWorkflowFetchResource`. In practice,
+the actual definition of `ExecuteWorkflowFetchResource` is essentially worthless
+(because it is auto-generated); I'm usually interested in seeing the implementation
+of `FetchResource`.
+
+To get to this definition, I would copy the non-generated portion of the function
+name (`FetchResource`) and then type in a query: `func \(.*\) FetchResource`.
+Doing this many times a day became a cumbersome annoyance that this plugin aims
+to solve. Given a list of prefixes and suffixes produced by auto-generated code,
+this plugin can determine if the word under cursor should be stripped of those
+prefixes & suffixes, and then jump to the *stripped* word.
+
+This project was built with golang in mind. Thus, the default query searches
+for a golang function.
+
+I built this project to solve a problem I was facing, but if others find the concept
+useful, I would consider adding features so that other languages could be compatible.
+
+DEPENDENCIES 						*bowlcut-dependencies*
+
+This plugin is written in vim9script. Make sure you have at least vim9 installed
+before using this.
+
+This plugin has a default dependency on fzf, but it can easily be disabled by
+configuring |g:bowlcut_multiple_match_func|
+
+COMMANDS 						*bowlcut-commands*
+
+							*BowlcutJump*
+:BowlcutJump		Strips list of prefixes and suffixes as defined in
+			the `g:bowlcut_prefixes` and
+			`g:bowlcut_suffixes` variables, respectively, and then
+			greps for the stripped word under cursor. If it finds
+			a single match, it will jump to that definition
+			and return true. If it finds no matches, it will do
+			nothing. If it finds multiple matches,  it will call
+			the function defined in the global variable
+			`g:bowlcut_multiple_match_func`, which defaults to a
+			function that opens the results in a fzf preview window.
+
+							*BowlcutJumpALE*
+:BowlcutJumpALE 	Does the same thing as |BowlcutJump| but also calls
+			ALE's ALEGoToDefinition if no results are found via
+			the grep. The ALE jump uses the ENTIRE word under
+			cursor, including any prefixes + suffixes that would
+			have been stripped in |BowlcutJump|.
+
+USAGE							*bowlcut-usage*
+
+Here is an example of how I use this plugin:
+
+let g:bowlcut_use_ripgrep = 1
+let g:bowlcut_prefixes = ["ExecuteActivity", "ExecuteWorkflow", "ExecuteChildWorkflow"]
+let g:bowlcut_suffixes = ["Async"]
+let g:bowlcut_include_files = ["*.go"]
+let g:bowlcut_exclude_files = ["*.pb.go"]
+augroup golang_jump
+  autocmd!
+  autocmd FileType go nnoremap <buffer> <C-]> :BowlcutJumpALE<CR>
+augroup END
+
+CONFIGURATION 						*bowlcut-config*
+
+							*g:bowlcut_prefixes*
+g:bowlcut_prefixes 	Define a list of prefixes to replace when attempting
+			to strip the word under cursor.
+
+			Default: []
+
+							*g:bowlcut_suffixes*
+g:bowlcut_suffixes 	Define a list of suffixes to replace when attempting
+			to strip the word under cursor.
+
+			Default: []
+
+g:bowlcut_use_ripgrep	Use ripgrep instead of grep when searching
+
+			Default: 0
+
+
+							*g:bowlcut_match_func*
+g:bowlcut_match_func	Define a custom function to invoke when searching for
+			the stripped word under cursor. This may option may be
+			useful if you want to use a grep mechanism other than
+			grep and ripgrep. This function MUST accept a single
+			string that is the stripped wonder under cursor. It
+			also MUST return a list of dictionaries that contain
+			the following keys and values: `filename`,
+			`line_number`, and `column_number`. `line_number` and
+			`column_number` MUST be of type number (which can be
+			accomplished using |str2nr|)
+
+			Default: `GetMatchesGrep` (see plugin/bowlcut.vim for
+			its definition & implementation)
+
+							*g:bowlcut_query_func*
+g:bowlcut_query_func	Define a custom function to invoke when building the
+			query string to pass to the grep tool. This function
+			MUST accept a string, which is the stripped word under
+			cursor. It MUST return a string that is a regex
+			pattern that will be provided to the grep tool.
+
+			Default: `DefaultQuery` which is implemented as
+			`'func \(.*\)' .. wordUnderCursor .. '\('` (see
+			plugin/bowlcut.vim for its definition & implementation)
+
+							*g:bowlcut_multiple_match_func*
+g:bowlcut_multiple_match_func	Define a custom function to invoke when
+				multiple matches are found for the stripped
+				word under cursor. This MUST accept two
+				arguments: `query: string` and
+				`matches: list<dict<any>>`. The first is the
+				query string we would pass to the grep tool,
+				and the second is the list of matches that we
+				found with the previous grep.
+
+				If you simply want to remove the default FZF
+				dependency, then set this to 0:
+				`let g:bowlcut_multiple_match_func = 0`
+
+				Default: `FzfFallback` (see plugin/bowlcut.vim
+				for its definition & implementation)
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

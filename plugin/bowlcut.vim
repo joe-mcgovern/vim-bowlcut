@@ -9,8 +9,8 @@ g:autoloaded_bowlcut = 1
 command! -nargs=0 BowlcutJump :call g:BowlcutJumpToDefinition()
 command! -nargs=0 BowlcutJumpALE :call g:BowlcutJumpToDefinitionWithALEFallback()
 
-const prefixes = get(g:, "bowlcut_prefixes", ["ExecuteActivity", "ExecuteWorkflow", "ExecuteChildWorkflow"])
-const suffixes = get(g:, "bowlcut_suffixes", ["Async"])
+const prefixes = get(g:, "bowlcut_prefixes", [])
+const suffixes = get(g:, "bowlcut_suffixes", [])
 const include_file_pattern = get(g:, "bowlcut_include_files", "")
 const exclude_file_pattern = get(g:, "bowlcut_exclude_files", "")
 
@@ -74,7 +74,7 @@ def GrepCommand(query: string): string
   return grepCmd .. ' ' .. query .. ' .'
 enddef
 
-def g:GetMatchesGrep(wordToSearch: string): list<dict<any>>
+def GetMatchesGrep(wordToSearch: string): list<dict<any>>
   const grepCmd = GrepCommand(Query(wordToSearch))
   const results = systemlist(grepCmd)
   var matches = []
@@ -100,7 +100,7 @@ def RipgrepCommand(query: string): string
   return grepCmd .. ' -- ' .. query
 enddef
 
-def g:GetMatchesRipgrep(wordToSearch: string): list<dict<any>>
+def GetMatchesRipgrep(wordToSearch: string): list<dict<any>>
   const grepCmd = RipgrepCommand(Query(wordToSearch))
   const results = systemlist(grepCmd)
   var matches = []
@@ -118,9 +118,9 @@ enddef
 
 const USE_GREP = get(g:, "bowlcut_use_grep", 1)
 const USE_RIPGREP = get(g:, "bowlcut_use_ripgrep", 0)
-var DefaultGetMatchesFunc = g:GetMatchesGrep
+var DefaultGetMatchesFunc = GetMatchesGrep
 if USE_RIPGREP
-  DefaultGetMatchesFunc = g:GetMatchesRipgrep
+  DefaultGetMatchesFunc = GetMatchesRipgrep
 endif
 const GetMatches = get(g:, "bowlcut_match_func", DefaultGetMatchesFunc)
 

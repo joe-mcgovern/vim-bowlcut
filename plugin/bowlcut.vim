@@ -24,7 +24,7 @@ def g:BowlcutJumpToDefinitionWithALEFallback()
   if result
       return
   endif
-  ale#definition#GoToCommandHandler()
+  ale#definition#GoTo({})
 enddef
 
 def g:BowlcutJumpToDefinition(): bool

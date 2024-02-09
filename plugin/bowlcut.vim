@@ -23,14 +23,14 @@ enddef
 
 def g:BowlcutJumpToDefinition(): bool
   const word = expand("<cword>")
-  var wordToSearch = bowlcut.RemovePrefixes(word)
-  if len(word) == len(wordToSearch)
+  var wordWithoutPrefixes = bowlcut.RemovePrefixes(word)
+  var wordWithoutPrefixesAndSuffixes = bowlcut.RemoveSuffixes(wordWithoutPrefixes)
+  if len(word) == len(wordWithoutPrefixesAndSuffixes)
     return false
   endif
-  wordToSearch = bowlcut.RemoveSuffixes(wordToSearch)
   # Make sure to exclude pb.go files from this search
-  JumpToDefinition(wordToSearch)
-  return true
+  var numMatches = JumpToDefinition(wordWithoutPrefixesAndSuffixes)
+  return numMatches > 0
 enddef
 
 const USE_GREP = get(g:, "bowlcut_use_grep", 1)
@@ -44,17 +44,10 @@ const GetMatches = get(g:, "bowlcut_match_func", DefaultGetMatchesFunc)
 # This function performs a typical fzf query
 def FzfFallback(query: string, matches: list<dict<any>>)
   var queryCmd = grep.GrepCommand(query)
-  var reloadCommand = grep.GrepCommand(shellescape('{q}'))
   if USE_RIPGREP
-    queryCmd = rg.RipgrepCommand(query)
-    reloadCommand = rg.RipgrepCommand(shellescape('{q}'))
+    queryCmd = rg.RipgrepCommand(query, true)
   endif
-  queryCmd = queryCmd .. ' || true'
-  reloadCommand = reloadCommand .. ' || true'
-  echom queryCmd
-  echom reloadCommand
-  const spec = {'options': ['--phony', '--query', query, '--bind', 'change:reload:' .. reloadCommand]}
-  fzf#vim#grep(queryCmd, 1, fzf#vim#with_preview(spec), 0)
+  fzf#vim#grep(queryCmd, fzf#vim#with_preview(), false)
 enddef
 
 const MultipleMatchFunction = get(g:, "bowlcut_multiple_match_func", FzfFallback)
@@ -63,20 +56,27 @@ const MultipleMatchFunction = get(g:, "bowlcut_multiple_match_func", FzfFallback
 # If more than one definition is found for the given word to search, it will
 # open up a fzf preview window for the user to select the one they would like
 # to go to.
-def JumpToDefinition(wordToSearch: string)
+# This function returns a number indicating the number of matches it found.
+# -1 indicates that there was an error.
+def JumpToDefinition(wordToSearch: string): number
   const matches = GetMatches(wordToSearch)
   # If there is more than one result, we should let the user pick which one
   # they want to jump to. To do that, we will RE RUN (🤦) the ripgrep query
   # and open the results in a fzf preview window. I couldn't find a way to
   # open the preview window using already retrieved results.
   if len(matches) > 1
-    echom MultipleMatchFunction
+    # type 2 is a Funcref type
     if type(MultipleMatchFunction) == 2
       MultipleMatchFunction(bowlcut.Query(wordToSearch), matches)
+      return len(matches)
     else
       echom "bowlcut: No multiple match function defined. Stopping."
     endif
-    return
+    return -1
+  endif
+  if len(matches) == 0
+    echom "bowlcut: No matches found. Stopping"
+    return 0
   endif
   const firstMatch = matches[0]
   const bufnum = bufadd(firstMatch.filename)
@@ -87,4 +87,5 @@ def JumpToDefinition(wordToSearch: string)
   setpos(".", [bufnum, firstMatch.line_number, firstMatch.column_number, 0])
   # Move the cursor to the word we are searching for
   search(wordToSearch)
+  return 1
 enddef

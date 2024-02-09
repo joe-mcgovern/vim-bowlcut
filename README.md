@@ -31,6 +31,17 @@ before using this.
 ⚠️ This plugin has a default dependency on fzf, but it can easily be disabled (see
 [Disabling FZF dependency](#disabling-fzf-dependency)).
 
+## Installation
+
+Install using your favorite package manager, or use Vim's built-in package support:
+
+```
+mkdir -p ~/.vim/pack/plugin/start
+cd ~/.vim/pack/plugin/start
+git clone https://github.com/joe-mcgovern/vim-bowlcut.git
+vim -u NONE -c "helptags bowlcut/doc" -c q
+```
+
 ## Usage
 
 This plugin provides two commands to jump to the correct definition under the cursor.
@@ -69,16 +80,9 @@ augroup golang_jump
 augroup END
 ```
 
-## Installation
-
-Install using your favorite package manager, or use Vim's built-in package support:
-
-```
-mkdir -p ~/.vim/pack/joe-mcgovern/start
-cd ~/.vim/pack/joe-mcgovern/start
-git clone https://github.com/joe-mcgovern/vim-bowlcut.git
-vim -u NONE -c "helptags bowlcut/doc" -c q
-```
+My dependencies for this setup are [ale](https://github.com/dense-analysis/ale) (my lsp manager), 
+[fzf](https://github.com/junegunn/fzf.vim) (my fuzzy finder) and [ripgrep](https://github.com/BurntSushi/ripgrep) 
+(the flavor of fuzzy finder I like to use).
 
 ## Configuration 
 

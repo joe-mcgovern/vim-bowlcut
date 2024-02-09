@@ -2,12 +2,17 @@ vim9script
 
 import autoload 'bowlcut.vim'
 
-const BASE_RIPGREP_COMMAND = 'rg --column --line-number --no-heading --smart-case '
+const BASE_RIPGREP_COMMAND = 'rg --column --line-number --no-heading --smart-case'
 
-export def RipgrepCommand(query: string): string
+export def RipgrepCommand(query: string, colorOutput: bool): string
   var grepCmd = BASE_RIPGREP_COMMAND
-  for include in bowlcut.GetIncludedFilePatterns()
-    grepCmd = grepCmd .. ' --glob ' .. shellescape(include)
+  if colorOutput == true
+    grepCmd = grepCmd .. ' --color=always'
+  else
+    grepCmd = grepCmd .. ' --color=never'
+  endif
+  for inc in bowlcut.GetIncludedFilePatterns()
+    grepCmd = grepCmd .. ' --glob ' .. shellescape(inc)
   endfor
   for exclude in bowlcut.GetExcludedFilePatterns()
     grepCmd = grepCmd .. ' --glob ' .. shellescape('!' .. exclude)
@@ -16,7 +21,7 @@ export def RipgrepCommand(query: string): string
 enddef
 
 export def GetMatchesRipgrep(wordToSearch: string): list<dict<any>>
-  const grepCmd = RipgrepCommand(bowlcut.Query(wordToSearch))
+  const grepCmd = RipgrepCommand(bowlcut.Query(wordToSearch), false)
   const results = systemlist(grepCmd)
   var matches = []
   for result in results
